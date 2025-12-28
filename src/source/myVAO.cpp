@@ -7,6 +7,7 @@ void myVAO::init()
 }
 void myVAO::destory()
 {
+    unbind();
     if(m_ID)
         glDeleteVertexArrays(1,&m_ID);
 }

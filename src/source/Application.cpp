@@ -1,13 +1,8 @@
 #include "Application.hpp"
 #include "myWindow.hpp"
-
-#include <glad/glad.h>
-
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_scancode.h>
-#include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_video.h>
-#include <spdlog/spdlog.h>
+#include <box2d/id.h>
+#include <box2d/math_functions.h>
+#include <box2d/types.h>
 
 
 void Application::init()
@@ -21,14 +16,49 @@ void Application::init()
     }
     myWindow::init();
 
-
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
     {
         SPDLOG_ERROR("COULD NOT INIT GLAD");
         is_running = false;
     }
 
+    b2WorldDef l_worldDef = b2DefaultWorldDef();
+    l_worldDef.gravity = (b2Vec2){0.0,0.0};
 
+    m_worldId = b2CreateWorld(&l_worldDef);
+
+    m_player.init(m_worldId);
+    m_ball.init(m_worldId);
+
+    // Making the world walls
+
+    {
+        b2BodyDef l_wallDef = b2DefaultBodyDef();
+        l_wallDef.type = b2_staticBody;
+        b2ShapeDef l_shapeShapeDef = b2DefaultShapeDef();
+        l_shapeShapeDef.material.restitution = 1.0f;
+        l_shapeShapeDef.material.friction = 0.0f;
+
+        // left wall
+        l_wallDef.position = (b2Vec2){0.0-5.f,HEIGHT/2.f};
+        b2BodyId LeftWall = b2CreateBody(m_worldId, &l_wallDef);
+        b2Polygon LeftWallShape = b2MakeBox(5.f,HEIGHT/2.f);
+        b2CreatePolygonShape(LeftWall, &l_shapeShapeDef, &LeftWallShape);
+
+        // Right wall
+        l_wallDef.position = (b2Vec2){WIDTH+5.f,HEIGHT/2.f};
+        b2BodyId RightWall = b2CreateBody(m_worldId, &l_wallDef);
+        b2Polygon RightWallShape = b2MakeBox(5.f, HEIGHT/2.f);
+        b2CreatePolygonShape(RightWall, &l_shapeShapeDef, &RightWallShape);
+
+
+        // Up wall
+        l_wallDef.position = (b2Vec2){WIDTH/2.f,HEIGHT+5.f};
+        b2BodyId UpWall = b2CreateBody(m_worldId, &l_wallDef);
+        b2Polygon UpWallShape = b2MakeBox(WIDTH,5.f);
+        b2CreatePolygonShape(UpWall, &l_shapeShapeDef, &UpWallShape);
+
+    }
 }
 
 void Application::Input()
@@ -47,6 +77,8 @@ void Application::Input()
         myWindow::Input(&e);
     }
 
+    m_player.input();
+    m_player.input();
 }
 
 void Application::Update()
@@ -62,6 +94,10 @@ void Application::Update()
     //     ;
     millisecsLastFrame = SDL_GetTicks();
 
+    m_player.update();
+    m_ball.update();
+    b2World_Step(m_worldId, 1/60.f, 4);
+
 
 }
 
@@ -70,13 +106,15 @@ void Application::Render()
     glClearColor(29 / 255.f, 32 / 255.f, 33 / 255.f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-
-
+    m_player.render();
+    m_ball.render();
     myWindow::Render();
 }
 
 void Application::destory()
 {
+    m_player.destory();
+    m_ball.destory();
     myWindow::destory();
     SDL_Quit();
 }

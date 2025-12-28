@@ -65,8 +65,10 @@ void myShader::init(std::string p_vertPath, std::string p_fragPath)
     glDeleteShader(l_vertShader);
     glDeleteShader(l_fragShader);
 }
+
 void myShader::destory()
 {
+    unUseProgram();
     if (m_ProgramID)
         glDeleteProgram(m_ProgramID);
 }

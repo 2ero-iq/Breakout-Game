@@ -9,6 +9,7 @@ void myVBO::init(float* p_vertices, size_t p_size)
 }
 void myVBO::destory()
 {
+    unbind();
     glDeleteBuffers(1,&m_ID);
 }
 

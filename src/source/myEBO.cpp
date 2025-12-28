@@ -9,6 +9,7 @@ void myEBO::init(unsigned int* p_idicate, size_t p_size)
 }
 void myEBO::destory()
 {
+    unbind();
     glDeleteBuffers(1,&m_ID);
 }
 

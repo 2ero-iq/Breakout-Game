@@ -48,3 +48,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
+
+find_package(box2d CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE box2d::box2d)
